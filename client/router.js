@@ -1,12 +1,15 @@
 var Router = require('ampersand-router');
 var HomePage = require('./pages/home');
 var HowlsPage = require('./pages/howls');
+var qs = require('querystring');
 
 
 module.exports = Router.extend({
     routes: {
         '': 'home',
-        'howls': 'howls'
+        'howls': 'howls',
+        'login': 'login',
+        'auth/callback': 'authCallback'
     },
 
     home: function () {
@@ -15,5 +18,17 @@ module.exports = Router.extend({
 
     howls: function () {
         this.trigger('page', new HowlsPage());
+    },
+
+    login: function () {
+        var redirect = encodeURIComponent(window.location.origin + '/auth/callback');
+        window.location = 'http://wolves.technology/authorize?redirect_uri=' + redirect;
+    },
+
+    authCallback: function () {
+        var hash = window.location.hash.slice(1);
+        var token = qs.parse(hash).access_token;
+        app.me.token = token;
+        this.redirectTo('/howls');
     }
 });
